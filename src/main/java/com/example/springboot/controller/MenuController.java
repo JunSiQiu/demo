@@ -34,18 +34,7 @@ public class MenuController {
     // 查询所有数据
     @GetMapping
     public Result findALL(@RequestParam(defaultValue = "") String name){
-        QueryWrapper<Menu> queryWrapper = new QueryWrapper<>();
-        queryWrapper.like("name",name);
-        queryWrapper.orderByAsc("id");
-        // 查询所有的数据
-        List<Menu> list = menuService.list();
-        // 找出pid为null的一级菜单
-        List<Menu> parentNode = list.stream().filter(menu -> menu.getPid() == null).collect(Collectors.toList());
-        // 找出一级菜单的子菜单
-        for (Menu menu : parentNode) {
-            menu.setChildren(list.stream().filter(m -> menu.getId().equals(m.getPid())).collect(Collectors.toList()));
-        }
-        return Result.success(parentNode);
+        return Result.success(menuService.findMenus(name));
     }
 
     // 删除

@@ -43,4 +43,7 @@ public class User {
 
     @ApiModelProperty("创建时间")
     private Date createTime;
+
+    @ApiModelProperty("角色")
+    private String role;
 }

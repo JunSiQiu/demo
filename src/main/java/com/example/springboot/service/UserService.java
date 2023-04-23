@@ -6,15 +6,29 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.springboot.common.Constants;
 import com.example.springboot.common.Result;
 import com.example.springboot.controller.dto.UserDto;
+import com.example.springboot.entity.Menu;
 import com.example.springboot.entity.User;
 import com.example.springboot.exception.ServiceException;
+import com.example.springboot.mapper.RoleMapper;
+import com.example.springboot.mapper.RoleMenuMapper;
 import com.example.springboot.mapper.UserMapper;
 import com.example.springboot.utils.TokenUtils;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class UserService extends ServiceImpl<UserMapper, User> {
+
+    @Resource
+    private RoleMapper roleMapper;
+    @Resource
+    private RoleMenuMapper roleMenuMapper;
+    @Resource
+    private MenuService menuService;
 
     public Boolean saveUser(User user) {
 //        System.out.println(user.getNickname());
@@ -33,6 +47,11 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             // 设置token
             String token= TokenUtils.genToken(one.getId().toString(), one.getPassword());
             userDto.setToken(token);
+
+            String role = one.getRole();  // ROLE_ADMIN
+            // 设置用户的菜单列表
+            List<Menu> roleMenus = getRoleMenus(role);
+            userDto.setMenus(roleMenus);
             return userDto;
         }else {
             throw new ServiceException(Constants.CODE_600, "用户名或密码错误");
@@ -62,6 +81,31 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             throw new ServiceException(Constants.CODE_500, "系统错误");
         }
         return one;
+    }
+
+    /**
+     * 获取当前角色的菜单列表
+     * @param roleFlag
+     * @return
+     */
+    private List<Menu> getRoleMenus(String roleFlag){
+        Integer roleId = roleMapper.selectByFlag(roleFlag);
+        // 当前角色的所有菜单Id集合
+        List<Integer> menuIds = roleMenuMapper.selectByRoleId(roleId);
+        // 查出系统所有的菜单
+        List<Menu> menus = menuService.findMenus("");
+        // new一个最后筛选完成之后的list
+        List<Menu> roleMenus = new ArrayList<>();
+        // 筛选当前用户角色的菜单
+        for (Menu menu : menus) {
+            if(menuIds.contains(menu.getId())){
+                roleMenus.add(menu);
+            }
+            List<Menu> children = menu.getChildren();
+            // removeIf 移除children里面不在 menuIds集合中的元素
+            children.removeIf(child -> !menuIds.contains(child.getId()));
+        }
+        return roleMenus;
     }
 
 //    @Autowired

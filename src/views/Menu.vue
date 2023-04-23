@@ -1,15 +1,13 @@
 <template>
   <div>
     <div style="margin: 10px 0">
-      <el-input style="width: 200px" prefix-icon="el-icon-search" placeholder="请输入名称" v-model="username"></el-input>
-      <el-input style="width: 200px" prefix-icon="el-icon-position" placeholder="请输入地址" class="ml-5" v-model="email"></el-input>
-      <el-input style="width: 200px" prefix-icon="el-icon-message" placeholder="请输入邮箱" class="ml-5" v-model="address"></el-input>
+      <el-input style="width: 200px" prefix-icon="el-icon-search" placeholder="请输入名称" v-model="name"></el-input>
       <el-button style="margin-left: 5px" @click="load" type="primary">搜索</el-button>
       <el-button type="warning" @click="reset">重置</el-button>
     </div>
 
     <div style="margin: 10px 0">
-      <el-button type="primary" @click="handleApp">新增 <i class="el-icon-plus"></i></el-button>
+      <el-button type="primary" @click="handleApp()">新增 <i class="el-icon-plus"></i></el-button>
       <el-popconfirm
           class="ml-5 mr-5"
           confirm-button-text='确定'
@@ -21,23 +19,24 @@
       >
         <el-button type="danger" slot="reference">批量删除 <i class="el-icon-minus"></i></el-button>
       </el-popconfirm>
-      <el-upload action="http://localhost:8081/user/import" :show-file-list="false" accept="xlsx"
-                 :on-success="handleExcelImportSuccess" style="display: inline-block" class="mr-5">
-        <el-button type="primary">导入 <i class="el-icon-bottom"></i></el-button>
-      </el-upload>
-      <el-button type="primary" @click="exp">导出 <i class="el-icon-top"></i></el-button>
     </div>
 
-    <el-table :data="tableData" border stripe header-cell-class-name="headerBg" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55"></el-table-column>
-      <el-table-column prop="id" label="ID" width="120"></el-table-column>
-      <el-table-column prop="username" label="用户名" width="140"></el-table-column>
-      <el-table-column prop="nickname" label="昵称" width="120"></el-table-column>
-      <el-table-column prop="email" label="邮箱"></el-table-column>
-      <el-table-column prop="phone" label="电话"></el-table-column>
-      <el-table-column prop="address" label="地址"></el-table-column>
-      <el-table-column label="操作">
+    <el-table :data="tableData" border stripe header-cell-class-name="headerBg" 
+      row-key="id" default-expand-all
+      @selection-change="handleSelectionChange">
+      <el-table-column type="selection"></el-table-column>
+      <el-table-column prop="id" label="ID"></el-table-column>
+      <el-table-column prop="name" label="名称"></el-table-column>
+      <el-table-column prop="path" label="路径"></el-table-column>
+      <el-table-column label="图标" align="center">
+        <template slot-scope="scope">
+          <i :class="scope.row.icon" style="font-size: 20px;"/>
+        </template>
+      </el-table-column>
+      <el-table-column prop="description" label="描述"></el-table-column>
+      <el-table-column label="操作" width="300" align="center">
         <template v-slot="scope">
+          <el-button type="primary" @click="handleApp(scope.row.id)" v-if="!scope.row.pid && !scope.row.path">新增子菜单<i class="el-icon-edit"></i></el-button>
           <el-button type="success" @click="handleEdit(scope.row)">编辑 <i class="el-icon-edit"></i></el-button>
           <el-popconfirm
               class="ml-5"
@@ -68,20 +67,21 @@
 
     <el-dialog title="用户信息" :visible.sync="dialogFormVisible" width="30%">
       <el-form label-width="60px" size="small">
-        <el-form-item label="用户名">
-          <el-input v-model="form.username" autocomplete="off"></el-input>
+        <el-form-item label="名称">
+          <el-input v-model="form.name" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="昵称">
-          <el-input v-model="form.nickname" autocomplete="off"></el-input>
+        <el-form-item label="路径">
+          <el-input v-model="form.path" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="邮箱">
-          <el-input v-model="form.email" autocomplete="off"></el-input>
+        <el-form-item label="图标">
+          <el-select clearable v-model="form.icon" placeholder="请选择" style="width: 100%;">
+            <el-option v-for="item in options" :key="item.name" :label="item.name" :value="item.value">
+              <i :class="item.value"/> {{ item.name }}
+            </el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="电话">
-          <el-input v-model="form.phone" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="地址">
-          <el-input v-model="form.address" autocomplete="off"></el-input>
+        <el-form-item label="描述">
+          <el-input v-model="form.description" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -102,12 +102,11 @@ export default {
       total:0,
       pageNum:1,
       pageSize:10,
-      username:"",
-      email:"",
-      address:"",
+      name:"",
       dialogFormVisible:false,
       form:{},
       multipleSelection:[],
+      options:[]
     }
   },
   created() {
@@ -116,22 +115,17 @@ export default {
   methods: {
     load(){
       // 请求分页查询数据
-      this.request.get("/user/page", {
+      this.request.get("/menu", {
         params:{
-          pageNum:this.pageNum,
-          pageSize:this.pageSize,
-          username:this.username,
-          email:this.email,
-          address:this.address
+          name:this.name,
         }
       }).then(res => {
         console.log(res.data)
-        this.tableData = res.data.records
-        this.total = res.data.total
+        this.tableData = res.data
       })
     },
     save(){
-      this.request.post("/user/save",this.form).then(res => {
+      this.request.post("/menu/save",this.form).then(res => {
         if(res.code == '200'){
           this.$message.success("保存成功")
           this.dialogFormVisible = false
@@ -140,16 +134,23 @@ export default {
           this.$message.error("保存失败")
       })
     },
-    handleApp(){
+    handleApp(pid){
       this.dialogFormVisible = true
       this.form = {}
+      if(pid){
+        this.form.pid = pid
+      }
     },
     handleEdit(row){
       this.form = row
       this.dialogFormVisible = true
+      // 请求图标的数据
+      this.request.get("/menu/icons").then(res => {
+        this.options = res.data
+      })
     },
     del(id){
-      this.request.delete("/user/"+id).then(res => {
+      this.request.delete("/menu/"+id).then(res => {
         console.log(res)
         if(res.code == '200'){
           this.$message.success("删除成功")
@@ -165,7 +166,7 @@ export default {
     },
     delBatch(){
       let ids = this.multipleSelection.map(v => v.id)     //[{},{},{}] => [1,2,3]
-      this.request.post("/user/del/batch",ids).then(res => {
+      this.request.post("/menu/del/batch",ids).then(res => {
         if(res.code == '200'){
           this.$message.success("批量删除成功")
           this.dialogFormVisible = false
@@ -175,9 +176,7 @@ export default {
       })
     },
     reset(){
-      this.username = ""
-      this.email = ""
-      this.address = ""
+      this.name = ""
       this.load()
     },
     // 页面显示数量(默认10条)
@@ -190,13 +189,6 @@ export default {
     handleCurrentChange(pageNum){
       console.log("当前页数:"+pageNum)
       this.pageNum = pageNum
-      this.load()
-    },
-    exp(){
-      window.open("http://localhost:8081/user/export")
-    },
-    handleExcelImportSuccess(){
-      this.$message.success("导入成功")
       this.load()
     },
   }

@@ -32,6 +32,7 @@
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column prop="id" label="ID" width="120"></el-table-column>
       <el-table-column prop="username" label="用户名" width="140"></el-table-column>
+      <el-table-column prop="role" label="角色"></el-table-column>
       <el-table-column prop="nickname" label="昵称" width="120"></el-table-column>
       <el-table-column prop="email" label="邮箱"></el-table-column>
       <el-table-column prop="phone" label="电话"></el-table-column>
@@ -71,6 +72,11 @@
         <el-form-item label="用户名">
           <el-input v-model="form.username" autocomplete="off"></el-input>
         </el-form-item>
+        <el-form-item label="角色">
+          <el-select v-model="form.role" placeholder="请选择角色" style="width: 100%;">
+            <el-option v-for="item in roles" :key="item.name" :label="item.name" :value="item.flag"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="昵称">
           <el-input v-model="form.nickname" autocomplete="off"></el-input>
         </el-form-item>
@@ -108,6 +114,7 @@ export default {
       dialogFormVisible:false,
       form:{},
       multipleSelection:[],
+      roles:[],
     }
   },
   created() {
@@ -128,6 +135,10 @@ export default {
         console.log(res.data)
         this.tableData = res.data.records
         this.total = res.data.total
+      })
+      
+      this.request.get("/role").then(res => {
+        this.roles = res.data
       })
     },
     save(){

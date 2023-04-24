@@ -3,7 +3,7 @@
     <el-aside :width="sideWidth + 'px'" style="background-color: rgb(238, 241, 246);
     height: 100%; overflow-x: hidden; box-shadow: 2px 0 6px rgb(0 21 41 / 35%)">
       <!-- 侧边栏 -->
-      <Aside :isCollapse="isCollapse" :logoTextShow="logoTextShow" />
+      <Aside :isCollapse="isCollapse" :logoTextShow="logoTextShow" :menus="user.menus"/>
     </el-aside>
 
     <el-container>

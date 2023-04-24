@@ -90,7 +90,7 @@ export default {
       ]
     };
     this.request.get("/echarts/members").then(res => {
-      console.log(res)
+      // console.log(res)
       // 填空
       // option.xAxis.data = res.data.x
       option.series[0].data = res.data;

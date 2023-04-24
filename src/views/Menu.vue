@@ -28,6 +28,7 @@
       <el-table-column prop="id" label="ID"></el-table-column>
       <el-table-column prop="name" label="名称"></el-table-column>
       <el-table-column prop="path" label="路径"></el-table-column>
+      <el-table-column prop="pagePath" label="页面路径"></el-table-column>
       <el-table-column label="图标" align="center">
         <template slot-scope="scope">
           <i :class="scope.row.icon" style="font-size: 20px;"/>
@@ -66,12 +67,15 @@
     </div>
 
     <el-dialog title="用户信息" :visible.sync="dialogFormVisible" width="30%">
-      <el-form label-width="60px" size="small">
+      <el-form label-width="70px" size="small">
         <el-form-item label="名称">
           <el-input v-model="form.name" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="路径">
           <el-input v-model="form.path" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="页面路径">
+          <el-input v-model="form.pagePath" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="图标">
           <el-select clearable v-model="form.icon" placeholder="请选择" style="width: 100%;">

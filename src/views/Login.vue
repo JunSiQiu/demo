@@ -21,6 +21,8 @@
 </template>
 
 <script>
+import { setRouters } from '@/router';
+
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Login",
@@ -52,7 +54,10 @@ export default {
             console.log(res)
             if(res.code === '200'){
               localStorage.setItem("user",JSON.stringify(res.data))  // 存储用户信息到浏览器
-              this.$router.push("/home")
+              localStorage.setItem("menus",JSON.stringify(res.data.menus))  // 存储角色菜单到浏览器
+              // 动态设置当前用户的路由
+              setRouters()
+              this.$router.push("/")
               this.$message.success("登录成功")
             } else
               this.$message.error(res.msg)

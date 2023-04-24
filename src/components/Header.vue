@@ -31,6 +31,8 @@
 </template>
 
 <script>
+import store from '@/store'
+
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Header",
@@ -51,8 +53,7 @@ export default {
   },
   methods: {
     logout() {
-      this.$router.push("/login")
-      localStorage.removeItem("user")
+      store.commit("logout")
       this.$message.success("退出成功")
     }
   }

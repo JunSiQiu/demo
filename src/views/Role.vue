@@ -23,12 +23,13 @@
 
     <el-table :data="tableData" border stripe header-cell-class-name="headerBg" @selection-change="handleSelectionChange">
       <el-table-column type="selection"></el-table-column>
-      <el-table-column prop="id" label="ID"></el-table-column>
+      <el-table-column prop="id" label="ID" width="80"></el-table-column>
       <el-table-column prop="name" label="名称"></el-table-column>
+      <el-table-column prop="flag" label="唯一标识"></el-table-column>
       <el-table-column prop="description" label="描述"></el-table-column>
       <el-table-column label="操作">
         <template v-slot="scope">
-          <el-button type="info" @click="selectMenu(scope.row.id)">分配菜单<i class="el-icon-menu"></i></el-button>
+          <el-button type="info" @click="selectMenu(scope.row)">分配菜单<i class="el-icon-menu"></i></el-button>
           <el-button type="success" @click="handleEdit(scope.row)">编辑 <i class="el-icon-edit"></i></el-button>
           <el-popconfirm
               class="ml-5"
@@ -62,6 +63,9 @@
         <el-form-item label="名称">
           <el-input v-model="form.name" autocomplete="off"></el-input>
         </el-form-item>
+        <el-form-item label="唯一标识">
+          <el-input v-model="form.flag" autocomplete="off"></el-input>
+        </el-form-item>
         <el-form-item label="描述">
           <el-input v-model="form.description" autocomplete="off"></el-input>
         </el-form-item>
@@ -78,6 +82,7 @@
         show-checkbox
         node-key="id"
         ref="tree"
+        :check-strictly="true"
         :default-expanded-keys="expends"
         :default-checked-keys="checks"
         :props="defaultProps">
@@ -94,6 +99,8 @@
 </template>
 
 <script>
+import store from '@/store'
+
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: "User",
@@ -115,6 +122,7 @@ export default {
       expends:[],
       checks:[],
       roleId:0,
+      roleFlag:''
     }
   },
   created() {
@@ -150,6 +158,10 @@ export default {
         if(res.code == '200'){
           this.$message.success("绑定成功")
           this.menuDialogVisible = false
+          // 操作管理员角色后需要重新登录
+          if(this.roleFlag === "ROLE_ADMIN"){
+            store.commit("logout")
+          }
         }else {
           this.$message.error(res.msg)
         }
@@ -205,9 +217,10 @@ export default {
       this.pageNum = pageNum
       this.load()
     },
-    selectMenu(roleId) {
+    selectMenu(role) {
       this.menuDialogVisible = true
-      this.roleId = roleId
+      this.roleId = role.id
+      this.roleFlag = role.flag
       // 请求菜单数据
       this.request.get("/menu").then(res => {
         this.menuData = res.data
@@ -215,7 +228,7 @@ export default {
         this.expends =  this.menuData.map(v => v.id)
       })
 
-      this.request.get("/role/roleMenu/" + roleId).then(res => {
+      this.request.get("/role/roleMenu/" + this.roleId).then(res => {
         this.checks = res.data
       })
     }

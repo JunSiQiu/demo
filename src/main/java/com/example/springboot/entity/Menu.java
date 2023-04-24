@@ -32,4 +32,6 @@ public class Menu {
     private List<Menu> children;
 
     private Integer pid;
+
+    private String pagePath;
 }

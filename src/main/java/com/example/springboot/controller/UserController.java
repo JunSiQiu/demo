@@ -11,10 +11,10 @@ import com.example.springboot.controller.dto.UserDto;
 import com.example.springboot.entity.User;
 import com.example.springboot.service.UserService;
 import com.example.springboot.utils.TokenUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
@@ -25,7 +25,7 @@ import java.util.List;
 @RequestMapping("/user")
 public class UserController {
 
-    @Autowired
+    @Resource
     private UserService userService;
 
     // 登录
@@ -44,7 +44,7 @@ public class UserController {
     // 新增和修改
     @PostMapping("/save")
     public Result save(@RequestBody User user){
-        // 新增或者更新\
+        // 新增或者更新
         return Result.success(userService.saveUser(user));
     }
 

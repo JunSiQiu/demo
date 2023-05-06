@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.springboot.common.Constants;
-import com.example.springboot.common.Result;
 import com.example.springboot.controller.dto.UserDto;
 import com.example.springboot.entity.Menu;
 import com.example.springboot.entity.User;
@@ -13,7 +12,6 @@ import com.example.springboot.mapper.RoleMapper;
 import com.example.springboot.mapper.RoleMenuMapper;
 import com.example.springboot.mapper.UserMapper;
 import com.example.springboot.utils.TokenUtils;
-import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
